@@ -9,7 +9,7 @@ variable "project_id" {
   type        = string
 }
 
-variable "project_name" {
+variable "creation_project_name" {
   description = "The name of the GCP project"
   type        = string
 

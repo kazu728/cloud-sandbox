@@ -1,4 +1,6 @@
 terraform {
+  backend "gcs" {}
+
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -21,15 +23,15 @@ provider "google" {
 
 resource "google_project" "cloud-sandbox" {
   org_id          = var.org_id
-  project_id      = var.project_name
-  name            = var.project_name
+  project_id      = var.creation_project_name
+  name            = var.creation_project_name
   billing_account = var.billing_account
 
-  deletion_policy = "PREVENT"
+  deletion_policy = "DELETE"
 }
 
 resource "google_storage_bucket" "tfstate" {
-  name                        = "${var.project_name}-tfstate"
+  name                        = "${var.project_id}-tfstate"
   location                    = var.region
   uniform_bucket_level_access = true
 
