@@ -27,3 +27,17 @@ resource "google_project" "cloud-sandbox" {
 
   deletion_policy = "PREVENT"
 }
+
+resource "google_storage_bucket" "tfstate" {
+  name                        = "${var.project_name}-tfstate"
+  location                    = var.region
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
