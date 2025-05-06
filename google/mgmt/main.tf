@@ -30,16 +30,9 @@ resource "google_project" "cloud-sandbox" {
   deletion_policy = "DELETE"
 }
 
-resource "google_storage_bucket" "tfstate" {
-  name                        = "${var.project_id}-tfstate"
-  location                    = var.region
-  uniform_bucket_level_access = true
+module "tfstate" {
+  source = "../modules/storage"
 
-  versioning {
-    enabled = true
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+  project_id = var.project_id
+  region     = var.region
 }
