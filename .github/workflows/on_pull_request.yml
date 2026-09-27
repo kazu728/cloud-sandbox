@@ -1,0 +1,32 @@
+name: Terraform Validate
+
+on:
+  pull_request:
+    paths:
+      - "bootstrap/**"
+      - "google/**"
+      - "oci/**"
+      - ".github/workflows/on_pull_request.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        root:
+          - bootstrap/cloudflare
+          - bootstrap/google
+          - google
+          - oci
+    defaults:
+      run:
+        working-directory: ${{ matrix.root }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+      - run: terraform fmt -check
+      - run: terraform init -backend=false
+      - run: terraform validate
