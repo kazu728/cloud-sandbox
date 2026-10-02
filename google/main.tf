@@ -3,7 +3,6 @@ resource "google_project_service" "compute" {
   disable_on_destroy = false
 }
 
-# A dedicated VPC without firewall rules keeps ingress denied by default.
 resource "google_compute_network" "sandbox" {
   name                    = "sandbox"
   auto_create_subnetworks = false
@@ -22,11 +21,16 @@ resource "google_compute_instance" "sandbox" {
   name         = "sandbox"
   machine_type = "e2-micro"
   zone         = "us-west1-a"
+  tags         = var.migration_ssh_cidr == null ? [] : ["migration-ssh"]
+
+  metadata = {
+    enable-oslogin     = "TRUE"
+    serial-port-enable = "TRUE"
+  }
 
   boot_disk {
     initialize_params {
-      # Keep the family reference so image releases don't replace the VM.
-      image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+      image = google_compute_image.nixos.self_link
       size  = 10
       type  = "pd-standard"
     }
@@ -36,5 +40,19 @@ resource "google_compute_instance" "sandbox" {
     subnetwork = google_compute_subnetwork.sandbox.id
 
     access_config {}
+  }
+}
+
+resource "google_compute_firewall" "migration_ssh" {
+  count = var.migration_ssh_cidr == null ? 0 : 1
+
+  name          = "migration-ssh"
+  network       = google_compute_network.sandbox.id
+  source_ranges = [var.migration_ssh_cidr]
+  target_tags   = ["migration-ssh"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
   }
 }

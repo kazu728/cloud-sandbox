@@ -12,3 +12,5 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 backend.tf.disabled
+result
+result-*
