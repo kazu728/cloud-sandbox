@@ -3,7 +3,6 @@ resource "google_project_service" "compute" {
   disable_on_destroy = false
 }
 
-# A dedicated VPC without firewall rules keeps ingress denied by default.
 resource "google_compute_network" "sandbox" {
   name                    = "sandbox"
   auto_create_subnetworks = false
@@ -12,10 +11,12 @@ resource "google_compute_network" "sandbox" {
 }
 
 resource "google_compute_subnetwork" "sandbox" {
-  name          = "sandbox"
-  region        = "us-west1"
-  network       = google_compute_network.sandbox.id
-  ip_cidr_range = "10.0.0.0/24"
+  name             = "sandbox"
+  region           = "us-west1"
+  network          = google_compute_network.sandbox.id
+  ip_cidr_range    = "10.0.0.0/24"
+  stack_type       = "IPV4_IPV6"
+  ipv6_access_type = "EXTERNAL"
 }
 
 resource "google_compute_instance" "sandbox" {
@@ -23,10 +24,14 @@ resource "google_compute_instance" "sandbox" {
   machine_type = "e2-micro"
   zone         = "us-west1-a"
 
+  metadata = {
+    enable-oslogin     = "TRUE"
+    serial-port-enable = "TRUE"
+  }
+
   boot_disk {
     initialize_params {
-      # Keep the family reference so image releases don't replace the VM.
-      image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+      image = "projects/${var.project_id}/global/images/${var.nixos_image}"
       size  = 10
       type  = "pd-standard"
     }
@@ -34,7 +39,10 @@ resource "google_compute_instance" "sandbox" {
 
   network_interface {
     subnetwork = google_compute_subnetwork.sandbox.id
+    stack_type = "IPV4_IPV6"
 
-    access_config {}
+    ipv6_access_config {
+      network_tier = "PREMIUM"
+    }
   }
 }
