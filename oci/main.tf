@@ -6,20 +6,6 @@ data "oci_identity_availability_domains" "this" {
   compartment_id = var.tenancy_ocid
 }
 
-data "oci_core_images" "arm" {
-  compartment_id   = local.compartment_id
-  operating_system = "Canonical Ubuntu"
-  shape            = "VM.Standard.A1.Flex"
-  sort_by          = "TIMECREATED"
-  sort_order       = "DESC"
-
-  filter {
-    name   = "display_name"
-    values = ["^Canonical-Ubuntu-24\\.04-aarch64"]
-    regex  = true
-  }
-}
-
 resource "oci_core_vcn" "this" {
   compartment_id = local.compartment_id
   cidr_block     = "10.0.0.0/16"
@@ -81,11 +67,6 @@ resource "oci_core_subnet" "this" {
   security_list_ids = [oci_core_security_list.this.id]
 }
 
-resource "random_password" "console" {
-  length  = 20
-  special = false
-}
-
 resource "oci_core_instance" "this" {
   compartment_id      = local.compartment_id
   availability_domain = coalesce(var.availability_domain, data.oci_identity_availability_domains.this.availability_domains[0].name)
@@ -99,7 +80,7 @@ resource "oci_core_instance" "this" {
 
   source_details {
     source_type             = "image"
-    source_id               = data.oci_core_images.arm.images[0].id
+    source_id               = var.nixos_image_id
     boot_volume_size_in_gbs = 50
   }
 
@@ -108,19 +89,15 @@ resource "oci_core_instance" "this" {
   }
 
   metadata = {
-    user_data = base64encode(<<-EOT
-#cloud-config
-chpasswd:
-  expire: false
-  users:
-    - name: ubuntu
-      password: ${random_password.console.bcrypt_hash}
-EOT
-    )
+    ssh_authorized_keys = var.ssh_public_key
   }
 
   lifecycle {
-    # A newer image would replace the boot volume through an in-place update.
-    ignore_changes = [source_details[0].source_id]
+    # Cross-distribution boot volume replacement is unsupported by OCI.
+    replace_triggered_by = [terraform_data.nixos_image]
   }
+}
+
+resource "terraform_data" "nixos_image" {
+  input = var.nixos_image_id
 }
