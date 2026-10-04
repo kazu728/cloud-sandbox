@@ -1,0 +1,52 @@
+{
+	// The node authenticates with an OAuth client secret and advertises this
+	// tag (hosts/n150/modules/tailscale.nix), so access rules survive device
+	// re-registration; tagged nodes also get node key expiry disabled.
+	"tagOwners": {
+		"tag:homelab":       ["autogroup:admin"],
+		"tag:cloud-sandbox": ["autogroup:admin"],
+	},
+
+	"grants": [
+		{
+			"src": ["tag:cloud-sandbox"],
+			"dst": ["autogroup:internet"],
+			"ip":  ["*"],
+		},
+		{
+			"src": ["kazuki.matsuo.728@gmail.com"],
+			"dst": ["tag:cloud-sandbox"],
+			"ip":  ["tcp:22"],
+		},
+		// Allow only my devices -> homelab nodes, on the ports in use:
+		// 22 ssh/deploy, 443 grafana, 6443 k8s api, 8443 argo cd.
+		// homelab -> my devices stays blocked.
+		{
+			"src": ["kazuki.matsuo.728@gmail.com"],
+			"dst": ["tag:homelab"],
+			"ip":  ["tcp:22", "tcp:443", "tcp:6443", "tcp:8443"],
+		},
+	],
+
+	// Test access rules every time they're saved.
+	"tests": [
+		{
+			"src":    "kazuki.matsuo.728@gmail.com",
+			"accept": ["tag:cloud-sandbox:22"],
+			"deny":   ["tag:cloud-sandbox:80", "tag:cloud-sandbox:443"],
+		},
+		{
+			"src":  "tag:cloud-sandbox",
+			"deny": ["kazuki.matsuo.728@gmail.com:22"],
+		},
+		{
+			"src":    "kazuki.matsuo.728@gmail.com",
+			"accept": ["tag:homelab:22", "tag:homelab:443", "tag:homelab:6443", "tag:homelab:8443"],
+			"deny":   ["tag:homelab:80"],
+		},
+		{
+			"src":  "tag:homelab",
+			"deny": ["kazuki.matsuo.728@gmail.com:22"],
+		},
+	],
+}

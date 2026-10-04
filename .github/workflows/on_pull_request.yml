@@ -6,6 +6,7 @@ on:
       - "bootstrap/**"
       - "google/**"
       - "oci/**"
+      - "tailscale/**"
       - ".github/workflows/on_pull_request.yml"
 
 permissions:
@@ -21,6 +22,7 @@ jobs:
           - bootstrap/google
           - google
           - oci
+          - tailscale
     defaults:
       run:
         working-directory: ${{ matrix.root }}
