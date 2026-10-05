@@ -1,7 +1,4 @@
 {
-	// The node authenticates with an OAuth client secret and advertises this
-	// tag (hosts/n150/modules/tailscale.nix), so access rules survive device
-	// re-registration; tagged nodes also get node key expiry disabled.
 	"tagOwners": {
 		"tag:homelab":       ["autogroup:admin"],
 		"tag:cloud-sandbox": ["autogroup:admin"],
@@ -18,9 +15,6 @@
 			"dst": ["tag:cloud-sandbox"],
 			"ip":  ["tcp:22"],
 		},
-		// Allow only my devices -> homelab nodes, on the ports in use:
-		// 22 ssh/deploy, 443 grafana, 6443 k8s api, 8443 argo cd.
-		// homelab -> my devices stays blocked.
 		{
 			"src": ["kazuki.matsuo.728@gmail.com"],
 			"dst": ["tag:homelab"],
@@ -56,7 +50,6 @@
 		},
 	],
 
-	// Test access rules every time they're saved.
 	"tests": [
 		{
 			"src":    "kazuki.matsuo.728@gmail.com",
