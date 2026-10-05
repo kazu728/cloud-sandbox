@@ -88,10 +88,6 @@ resource "oci_core_instance" "this" {
     subnet_id = oci_core_subnet.this.id
   }
 
-  metadata = {
-    ssh_authorized_keys = var.ssh_public_key
-  }
-
   lifecycle {
     # Cross-distribution boot volume replacement is unsupported by OCI.
     replace_triggered_by = [terraform_data.nixos_image]

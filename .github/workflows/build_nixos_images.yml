@@ -16,7 +16,7 @@ jobs:
             runner: ubuntu-latest
             architecture: x86_64
             extension: raw.tar.gz
-            image: nixosConfigurations.google.config.system.build.image
+            image: packages.x86_64-linux.google-image
           - host: oci
             runner: ubuntu-24.04-arm
             architecture: aarch64

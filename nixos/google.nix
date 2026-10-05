@@ -1,12 +1,13 @@
-{ modulesPath, ... }:
+{ lib, modulesPath, ... }:
 
 {
   imports = [ "${modulesPath}/virtualisation/google-compute-image.nix" ];
 
   networking.hostName = "google";
   systemd.services."serial-getty@ttyS0".enable = true;
+  security.googleOsLogin.enable = lib.mkForce false;
 
-  # OS Login and DNS must use this VM's metadata server, outside the exit node.
+  # GCE metadata and DNS share this IP and must bypass the exit node.
   networking.localCommands = ''
     ip -4 rule del pref 100 to 169.254.169.254/32 lookup main 2>/dev/null || true
     ip -4 rule add pref 100 to 169.254.169.254/32 lookup main

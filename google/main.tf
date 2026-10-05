@@ -25,7 +25,6 @@ resource "google_compute_instance" "sandbox" {
   zone         = "us-west1-a"
 
   metadata = {
-    enable-oslogin     = "TRUE"
     serial-port-enable = "TRUE"
   }
 

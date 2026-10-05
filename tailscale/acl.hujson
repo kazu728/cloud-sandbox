@@ -28,6 +28,34 @@
 		},
 	],
 
+	"ssh": [
+		{
+			"action": "accept",
+			"src":    ["kazuki.matsuo.728@gmail.com"],
+			"dst":    ["tag:cloud-sandbox"],
+			"users":  ["root"],
+		},
+	],
+
+	"sshTests": [
+		{
+			"src":    "kazuki.matsuo.728@gmail.com",
+			"dst":    ["tag:cloud-sandbox"],
+			"accept": ["root"],
+			"deny":   ["autogroup:nonroot"],
+		},
+		{
+			"src":  "tag:cloud-sandbox",
+			"dst":  ["tag:cloud-sandbox"],
+			"deny": ["root"],
+		},
+		{
+			"src":  "tag:homelab",
+			"dst":  ["tag:cloud-sandbox"],
+			"deny": ["root"],
+		},
+	],
+
 	// Test access rules every time they're saved.
 	"tests": [
 		{
