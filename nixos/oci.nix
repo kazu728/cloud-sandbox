@@ -1,4 +1,4 @@
-{ modulesPath, ... }:
+{ modulesPath, pkgs, ... }:
 
 {
   imports = [ "${modulesPath}/virtualisation/oci-image.nix" ];
@@ -48,4 +48,35 @@
   };
 
   networking.firewall.trustedInterfaces = [ "cni0" ];
+
+  services.opentelemetry-collector = {
+    enable = true;
+    package = pkgs.opentelemetry-collector-contrib;
+    settings = {
+      extensions.file_storage.directory = "/var/lib/opentelemetry-collector";
+      receivers.journald.storage = "file_storage";
+      processors = {
+        resource.attributes = [
+          {
+            key = "service.name";
+            value = "systemd-journal";
+            action = "insert";
+          }
+        ];
+        batch = { };
+      };
+      exporters.otlp_http.endpoint = "http://10.43.0.100:4318";
+      service = {
+        extensions = [ "file_storage" ];
+        pipelines.logs = {
+          receivers = [ "journald" ];
+          processors = [
+            "resource"
+            "batch"
+          ];
+          exporters = [ "otlp_http" ];
+        };
+      };
+    };
+  };
 }

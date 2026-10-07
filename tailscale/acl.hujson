@@ -13,7 +13,7 @@
 		{
 			"src": ["kazuki.matsuo.728@gmail.com"],
 			"dst": ["tag:cloud-sandbox"],
-			"ip":  ["tcp:22"],
+			"ip":  ["tcp:22", "tcp:30300"],
 		},
 		{
 			"src": ["kazuki.matsuo.728@gmail.com"],
@@ -53,7 +53,7 @@
 	"tests": [
 		{
 			"src":    "kazuki.matsuo.728@gmail.com",
-			"accept": ["tag:cloud-sandbox:22"],
+			"accept": ["tag:cloud-sandbox:22", "tag:cloud-sandbox:30300"],
 			"deny":   ["tag:cloud-sandbox:80", "tag:cloud-sandbox:443"],
 		},
 		{
